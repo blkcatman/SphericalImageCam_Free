@@ -1,4 +1,4 @@
-#SphericalImageCam for Unity5(free version)
+#SphericalImageCam_Free for Unity5
 SphericalImageCam can create 360 panorama view in Unity5!
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/-Wj56cN4C6M" frameborder="0" allowfullscreen></iframe>
