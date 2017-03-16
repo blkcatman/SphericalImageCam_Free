@@ -9,6 +9,7 @@ Shader "Hidden/SphericalShader" {
 		_MainTex ("Base (RGB)", 2D) = "" {}
 		_rt("rt", Vector) = (0,0,0,0)
 		_fl("fl", Vector) = (0,0,0,0)
+		_ps("ps", Vector) = (0,0,1,1)
 	}
 	
 	CGINCLUDE
@@ -25,6 +26,7 @@ Shader "Hidden/SphericalShader" {
 	sampler2D _MainTex;
 	float4 _rt;
 	float4 _fl;
+	float4 _ps;
 	
 	v2f vert( appdata_img v ) 
 	{
@@ -37,12 +39,17 @@ Shader "Hidden/SphericalShader" {
 		o.uv = float2(
 			_fl.x + _fl.z*v.texcoord.x,
 			_fl.y + _fl.w*v.texcoord.y);
+
+
 	
 	#if UNITY_UV_STARTS_AT_TOP
 		o.pos.y = -o.pos.y;
 	#else
 		o.pos.y = o.pos.y;
 	#endif
+
+	o.pos.x = o.pos.x * _ps.z + _ps.x;
+	o.pos.y = o.pos.y * _ps.w + _ps.y;
 		
 		return o;
 	}

@@ -1,4 +1,4 @@
-//SphericalImageCam.cs
+//SphericalImageCam_Free.cs
 //
 //Copyright (c) 2015 Tatsuro Matsubara
 //SphericalImageCam_Free is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
@@ -33,6 +33,16 @@ public class SphericalImageCam_Free : MonoBehaviour {
 	public RenderTexture target;
 	[HideInInspector]
 	public Shader shader;
+	[HideInInspector]
+	public bool drawOnOffscreen = false;
+
+	private Vector4 graphicRect;
+
+	void Awake() {
+		if(shader == null) {
+			shader = Resources.Load<Shader>("SphericalShader");
+		}
+	}
 
 	void Start() {
 		if (target == null) {
@@ -44,7 +54,7 @@ public class SphericalImageCam_Free : MonoBehaviour {
 		if (!CheckSupport(main.hdr)) {
 			return;
 		}
-		if (!shader) {
+		if (shader == null) {
 			Debug.LogWarning("Missing the shader \"Hidden/SphericalShader\"!");
 			return;
 		}
@@ -87,11 +97,32 @@ public class SphericalImageCam_Free : MonoBehaviour {
 		canDraw = true;
 	}
 
+	public void SetGraphicRect(Vector4 rect) {
+		graphicRect = rect;
+		Invoke("SetRect", 0.01f);
+	}
+
+	void SetRect() {
+		RenderEvent[] evs = gameObject.GetComponentsInChildren<RenderEvent>();
+		if (evs.Length > 0) {
+			foreach(RenderEvent ev in evs) {
+				if (ev == null) {
+					continue;
+				}
+				if (ev.material != null) {
+					ev.material.SetVector("_ps", graphicRect);
+				}
+			}
+		} else {
+			Debug.Log("AAAAAA");
+		}
+	}
+
 	bool CheckSupport(bool needHdr) {
 		supportHDRTextures = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
 		supportDX11 = SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders;
 
-		if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures) {
+		if (!SystemInfo.supportsImageEffects) {
 			Debug.LogWarning("ImageEffects or RenderTexture is not supported on this platform!");
 			return false;
 		}
@@ -103,7 +134,7 @@ public class SphericalImageCam_Free : MonoBehaviour {
 	}
 
 	void OnRenderImage(RenderTexture source, RenderTexture destination) {
-		if (canDraw) {
+		if (canDraw && !drawOnOffscreen) {
 			Graphics.Blit(target, destination);
 		}
 	}
